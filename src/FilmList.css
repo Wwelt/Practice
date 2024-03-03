@@ -1,0 +1,19 @@
+label {
+    display: block;
+    font:
+            1rem 'Fira Sans',
+            sans-serif;
+}
+
+input{
+    margin-left: 30px;
+    vertical-align: before-edge;
+}
+label {
+    margin: 0.1rem 0;
+}
+
+img{
+    width: 200px;
+    height: 260px;
+}
