@@ -7,15 +7,13 @@ class FilmList extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = { items: [], text: '', url: '' };
+        this.state = { items: [], text: '', url: '', checked: false };
         this.handleChange = this.handleChange.bind(this);
         this.handleChangeUrl = this.handleChangeUrl.bind(this);
 
         this.handleSubmit = this.handleSubmit.bind(this);
         this.fileHandleChange = this.fileHandleChange.bind(this);
         this.handleLoad = this.handleLoad.bind(this);
-
-        this.SerializedElements = this.handleLoad();
     }
 
     render() {
@@ -23,7 +21,7 @@ class FilmList extends React.Component {
             <div>
                 <h2>Список фильмов</h2>
 
-                <TodoList items={ this.state.items} ser = {this.SerializedElements} />
+                <TodoList items={this.state.items.concat(this.handleLoad())} />
                 <form onSubmit={this.handleSubmit} >
                     <label htmlFor="new-todo">
                         Добавить фильм:<br/><br/>
@@ -87,6 +85,7 @@ class FilmList extends React.Component {
             text: this.state.text,
             url: this.state.url,
             src: this.Url,
+            checked: this.state.checked,
             id: Date.now()
         };
         this.setState(state => ({
@@ -95,18 +94,15 @@ class FilmList extends React.Component {
             text: ''
         }));
 
-        if (this.state === "undefined" || this.state.items[localStorage.length - 1] === "undefined") return;
-
-        localStorage.setItem(localStorage.length.toString(), JSON.stringify(newItem));
-
-
+        localStorage.setItem(newItem.id.toString(), JSON.stringify(newItem));
     }
      handleLoad(){
-        const NewItems = [];
-        for (let i = 0; i < localStorage.length; i++){
-            if (localStorage.getItem(localStorage.key(i)) === "undefined") continue ;
+        let NewItems = [];
 
-            NewItems.concat([JSON.parse(localStorage.getItem(localStorage.key(i)))]);
+        for (let i = 0; i < localStorage.length; i++){
+            //if (localStorage.getItem(localStorage.key(i)) === "undefined") continue ;
+
+            NewItems.push(JSON.parse(localStorage.getItem(localStorage.key(i))));
         }
 
         return NewItems;
@@ -115,16 +111,44 @@ class FilmList extends React.Component {
 }
 
 class TodoList extends React.Component {
+
+
     render() {
         return (
-            <ul>
-                {this.props.items.map(item => (
-                    <li key={item.id}>{item.text + ': ' + item.url}<br/><img src={item.src} alt = ""></img></li>
-                ))}
-                {this.props.ser.map(item => (
-                    <li key={item.id}>{item.text + ': ' + item.url}<br/><img src={item.src} alt = ""></img></li>
-                ))}
-            </ul>
+            <h6>
+                <ul id = "my-list">
+
+                    {this.props.items.map(item => (
+
+                            <li key={item.id} id = {item.id}>{item.text + ': ' + item.url}<br/><br/><img src={item.src} alt = ""></img><br/>
+
+                                <label htmlFor={item.id + ": label"}>Просмотрено:
+                                    <input id={item.id + ": label"}  type="checkbox" value="IsWatched"  onChange={() => function (){
+                                        const newItem = JSON.parse(localStorage.getItem(item.id));
+                                        localStorage.removeItem(item.id);
+                                        newItem.checked = !newItem.checked;
+                                        localStorage.setItem(item.id, item);
+
+                                        item = newItem;
+
+                                    }} checked={item.checked}></input>
+                                </label>
+                                <form onSubmit={()  => function (){
+                                    localStorage.removeItem(item.id);
+
+                                    this.innerHTML = '';
+                                }}>
+                                    <button>Удалить</button>
+                                </form>
+                                <br/><br/><br/>
+                            </li>
+
+                    ))}
+
+
+                </ul>
+            </h6>
+
         );
     }
 }
