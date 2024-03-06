@@ -5,9 +5,11 @@ class FilmList extends React.Component {
     Url;
     SerializedElements;
 
+    localStorageCount;
+
     constructor(props) {
         super(props);
-        this.state = { items: [], text: '', url: '', checked: false };
+        this.state = { items: [], text: '', url: ''};
         this.handleChange = this.handleChange.bind(this);
         this.handleChangeUrl = this.handleChangeUrl.bind(this);
 
@@ -21,7 +23,7 @@ class FilmList extends React.Component {
             <div>
                 <h2>Список фильмов</h2>
 
-                <TodoList items={this.state.items.concat(this.handleLoad())} />
+                <TodoList items={localStorage.length  > 0 ?this.handleLoad().concat( this.state.items) : this.state.items} />
                 <form onSubmit={this.handleSubmit} >
                     <label htmlFor="new-todo">
                         Добавить фильм:<br/><br/>
@@ -78,63 +80,87 @@ class FilmList extends React.Component {
 
     handleSubmit(e) {
         e.preventDefault();
+
         if (this.state.text.length === 0 || this.state.url.length === 0) {
             return;
         }
-        const newItem = {
+
+        let newItems = [{
             text: this.state.text,
             url: this.state.url,
             src: this.Url,
-            checked: this.state.checked,
             id: Date.now()
-        };
-        this.setState(state => ({
-            items: state.items.concat(newItem),
+        }];
+
+        if (localStorage.length > 0){
+
+
+            const temp = JSON.parse(localStorage.getItem('items'));
+
+           /* if (newItems[0].isArray){
+                newItems[0].push(temp);
+            }
+            else{
+            }*/
+
+            /*if (localStorage.length === 0){
+            }
+            else{
+
+            }*/
+
+            newItems = newItems.concat(temp);
+
+
+        }
+
+        this.setState(() => ({
+            items: newItems,
             url: '',
             text: ''
         }));
 
-        localStorage.setItem(newItem.id.toString(), JSON.stringify(newItem));
+        localStorage.setItem('items' , JSON.stringify(newItems));
     }
      handleLoad(){
-        let NewItems = [];
-
-        for (let i = 0; i < localStorage.length; i++){
-            //if (localStorage.getItem(localStorage.key(i)) === "undefined") continue ;
-
-            NewItems.push(JSON.parse(localStorage.getItem(localStorage.key(i))));
-        }
-
-        return NewItems;
+        return localStorage.length > 0 ? [JSON.parse(localStorage.getItem('items'))] : [];
     }
 
 }
 
 class TodoList extends React.Component {
 
+    liCount = 0;
+
 
     render() {
+        if (localStorage.length > 0)
+            if (JSON.parse(localStorage.getItem('items')).length === 0) return ;
+
+        let ser =this.props.items[0];
+
+        if (ser.isArray){
+
+        }
         return (
             <h6>
                 <ul id = "my-list">
 
-                    {this.props.items.map(item => (
+                    {ser.map(item => (
 
-                            <li key={item.id} id = {item.id}>{item.text + ': ' + item.url}<br/><br/><img src={item.src} alt = ""></img><br/>
+                            <li key={Math.random()}>{item.text + ': ' + item.url}<br/>
+                                <br/>
+                                <img src={item.src} alt = ""></img>
+                                <br/>
+                                <form onSubmit={() => {
 
-                                <label htmlFor={item.id + ": label"}>Просмотрено:
-                                    <input id={item.id + ": label"}  type="checkbox" value="IsWatched"  onChange={() => function (){
-                                        const newItem = JSON.parse(localStorage.getItem(item.id));
-                                        localStorage.removeItem(item.id);
-                                        newItem.checked = !newItem.checked;
-                                        localStorage.setItem(item.id, item);
+                                    if (localStorage.length === 0) return;
 
-                                        item = newItem;
+                                    const oldState = JSON.parse(localStorage.getItem('items'));
 
-                                    }} checked={item.checked}></input>
-                                </label>
-                                <form onSubmit={()  => function (){
-                                    localStorage.removeItem(item.id);
+                                    const newState = JSON.stringify([oldState].filter(el => el.id !== item.id));
+
+                                    localStorage.setItem('items', newState);
 
                                     this.innerHTML = '';
                                 }}>
@@ -144,6 +170,9 @@ class TodoList extends React.Component {
                             </li>
 
                     ))}
+                    <script>
+
+                    </script>
 
 
                 </ul>
